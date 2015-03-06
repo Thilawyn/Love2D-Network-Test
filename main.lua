@@ -23,7 +23,7 @@ function love.update(dt)
 			print("Client: Stop command sent to the server.")
 			wait = false
 
-			udp:send(string.format("%s %s", "plain", "stop"))
+			udp:send(string.format("%s %s %s", "plain", "stop", "saucisse"))
 		end
 	end
 end
