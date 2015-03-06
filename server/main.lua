@@ -14,20 +14,10 @@ while running do
 		print("Data received.")
 
 		local data_type, cmd, params = data:match("^(%S*) (%S*) (.*)")
-		print(data_type)
-		print(cmd)
-
-		if #params > 0 then
-			print("Params has "..#params.." values.")
-		end
 
 		if data_type == "plain" then
 			if cmd == "send" then
-				if #params < 1 then
-					print("The client sent a wrong command!")
-				else
---~ 					print("The client sent: "..params[1])
-				end
+				print("Client "..ip.." sent: "..params)
 			elseif cmd == "stop" then
 				running = false
 				print("==> Server is stopping...")
