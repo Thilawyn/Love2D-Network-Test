@@ -1,8 +1,8 @@
-socket = require "socket"
+local socket = require "socket"
 
 udp = socket.udp()
 udp:settimeout(0)
-udp:setsockname("*", 349)
+udp:setsockname("*", 1349)
 
 local running = true
 
