@@ -32,11 +32,11 @@ while running do
 			udp:sendto(string.format("%s %s", "error", "auth_error"), ip, port)
 		else
 			if cmd == "send" then
-				print("==> "..players[entity].name": "..params)
+				print("==> "..players[entity].name..": "..params)
 
---~ 				for k, v in pairs(players) do
---~ 					udp:sendto(string.format("%s %s %s", "chat", players[entity].name, params), v.ip, v.port)
---~ 				end
+				for k, v in pairs(players) do
+					udp:sendto(string.format("%s %s %s", "chat", players[entity].name, params), v.ip, v.port)
+				end
 			end
 		end
 	end
@@ -45,4 +45,4 @@ while running do
 end
 
 udp:close()
-print("==> Server stopped!")
+print("==> Server closed.")
