@@ -15,6 +15,7 @@ end
 
 local updaterate = 0.1
 local t = 0
+local chat = {}
 
 --
 
@@ -33,6 +34,11 @@ function love.update(dt)
 						entity = params
 						print("Client: You have been logged in by the server with entity ID "..entity..".")
 						state = "interactive"
+					end
+				elseif state == "interactive" then
+					if cmd == "chat" then
+						local name, message = params:match("^(%S*) (.*)")
+						table.insert(chat, name..": "..message)
 					end
 				end
 			end
@@ -79,6 +85,10 @@ function love.draw()
 		love.graphics.print("Enter your name: "..player_name, 10, 10)
 	elseif state == "interactive" then
 		love.graphics.print("> "..command, 10, 10)
+
+		for k, v in ipairs(chat) do
+			love.graphics.print(v, 10, 20+k*10)
+		end
 	end
 end
 
@@ -93,6 +103,6 @@ function request_login()
 end
 
 function send_command()
-	udp:send(string.format("%s %s %s", entity, "send", command))
+	udp:send(string.format("%s %s %s", entity, "chat", command))
 	command = ""
 end

@@ -12,7 +12,6 @@ while running do
 	local data, ip, port = udp:receivefrom()
 
 	if data then
-		print("==> Data received.")
 		local entity, cmd, params = data:match("^(%S*) (%S*) (.*)")
 
 		if entity == "none" then
@@ -31,7 +30,7 @@ while running do
 		elseif type(players[entity]) == nil then
 			udp:sendto(string.format("%s %s", "error", "auth_error"), ip, port)
 		else
-			if cmd == "send" then
+			if cmd == "chat" then
 				print("==> "..players[entity].name..": "..params)
 
 				for k, v in pairs(players) do
