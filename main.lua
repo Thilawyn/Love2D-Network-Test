@@ -1,36 +1,44 @@
-socket = require "socket"
+local socket = require "socket"
 
-state = "enter_name"
-player_name = ""
-adress, port = "localhost", 1349
+local state = "enter_name"
+local player_name = ""
+local command = ""
+local adress, port = "localhost", 1349
+local udp = socket.udp()
 
 function love.load()
 	server = love.thread.newThread("server/main.lua")
 	server:start()
 
 	love.keyboard.setKeyRepeat(true)
-
-	udp = socket.udp()
-	udp:settimeout(0)
-	udp:setpeername(adress, port)
-	udp:send(string.format("%s %s %s", "plain", "send", "I like sausages!"))
-
-	t = 0
-	wait = true
 end
+
+local updaterate = 0.1
+local t = 0
 
 --
 
 function love.update(dt)
-	if wait then
-		t = t+dt
+	t = t+dt
 
-		if t > 5 then
-			print("Client: Stop command sent to the server.")
-			wait = false
+	if t >= updaterate then
+		repeat
+			local data, msg = udp:receive()
 
-			udp:send(string.format("%s %s $", "plain", "stop"))
-		end
+			if data then
+				local cmd, params = data:match("^(%S*) (.*)")
+
+				if state == "waiting_for_entity" then
+					if cmd == "entity" then
+						entity = params
+						print("Client: You have been logged in by the server with entity ID "..entity..".")
+						state = "interactive"
+					end
+				end
+			end
+		until not data
+
+		t = 0
 	end
 end
 
@@ -41,7 +49,15 @@ function love.keypressed(key, is_repeat)
 				player_name = player_name:sub(1, #player_name-1)
 			end
 		elseif key == "return" and not is_repeat then
-			connect()
+			request_login()
+		end
+	elseif state == "interactive" then
+		if key == "backspace" then
+			if #command > 0 then
+				command = command:sub(1, #command-1)
+			end
+		elseif key == "return" and not is_repeat then
+			send_command()
 		end
 	end
 end
@@ -51,17 +67,32 @@ function love.textinput(text)
 		if #player_name <= 30 then
 			player_name = player_name..text
 		end
+	elseif state == "interactive" then
+		if #command <= 256 then
+			command = command..text
+		end
 	end
 end
 
 function love.draw()
 	if state == "enter_name" then
 		love.graphics.print("Enter your name: "..player_name, 10, 10)
+	elseif state == "interactive" then
+		love.graphics.print("> "..command, 10, 10)
 	end
 end
 
 --
 
-function connect()
-	state = "interactive"
+function request_login()
+	udp:settimeout(0)
+	udp:setpeername(adress, port)
+	udp:send(string.format("%s %s %s", "none", "login", player_name))
+
+	state = "waiting_for_entity"
+end
+
+function send_command()
+	udp:send(string.format("%s %s %s", entity, "send", command))
+	command = ""
 end
